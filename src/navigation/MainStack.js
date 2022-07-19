@@ -18,14 +18,17 @@ function MainStack({ initialRouteName }) {
       <Stack.Screen
         name="MainScreen"
         component={MainScreen}
+        options={{ headerShown: false }}
       />
       <Stack.Screen
         name="SecondScreen"
         component={SecondScreen}
+        options={{ headerShown: false, headerBackVisible: true }}
       />
       <Stack.Screen
         name="ThirdScreen"
         component={ThirdScreen}
+        options={{ headerShown: false, headerBackVisible: true }}
       />
     </Stack.Navigator>
   );

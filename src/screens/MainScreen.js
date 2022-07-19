@@ -11,7 +11,7 @@ export default function MainScreen({ navigation }) {
       <View>
         <Text style={styles.title}>CYBERSECURITY</Text>
         <Text style={styles.text1}>ESSENTIALS</Text>
-        <Text style={styles.text2}>A guide for companies and individuals for implementing organizationalcybersecurity practices.</Text>
+        <Text style={styles.text2}>A guide for companies and individuals for implementing organizational cybersecurity practices.</Text>
       </View>
       <TouchableOpacity
         style={styles.area}
@@ -35,25 +35,32 @@ const styles = StyleSheet.create({
   title: {
     color: '#fff',
     paddingTop: 70,
-    paddingHorizontal: 30
+    paddingHorizontal: 60,
+    fontSize: 70,
+    fontWeight: '500',
   },
   text1: {
     color: '#fff',
-    paddingHorizontal: 30,
-    paddingBottom: 30
+    paddingHorizontal: 60,
+    paddingBottom: 60,
+    fontSize: 70,
+    fontWeight: '500'
   },
   text2: {
     color: '#fff',
-    paddingHorizontal: 30
+    fontSize: 30,
+    textAlign: 'left',
+    paddingHorizontal: 60,
+
   },
   btn: {
-    width: '80%',
-    height: '80%'
+    width: '150%',
+    height: '150%'
   },
   area: {
     width: 250,
     height: 50,
-    marginBottom: 50,
+    marginBottom: 80,
     marginLeft: 30,
     justifyContent: 'flex-end',
   }

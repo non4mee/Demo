@@ -1,65 +1,186 @@
-import React, { useState, useEffect} from 'react'
-import { View, Text, StyleSheet, TouchableOpacity, Image } from 'react-native'
-// import Video from 'react-native-video'
-import VideoPlayer from 'react-native-video-controls';
-import Sound from 'react-native-sound'
+import React, { useState, useEffect, useRef } from 'react';
+import { StyleSheet, View, TouchableOpacity, Image, Text } from 'react-native';
+import Video from 'react-native-video';
+import Sound from 'react-native-sound';
+
+import Slider from './Slider';
 
 Sound.setCategory('Playback');
 
-const ding = new Sound('audio.mp3', Sound.MAIN_BUNDLE, (error) => {
-if (error) {
+import useInterval from '../hooks/useInterval';
+
+const sound = new Sound('audio.mp3', Sound.MAIN_BUNDLE, (error) => {
+  if (error) {
     console.log('failed to load the sound', error);
     return;
   }
-  console.log('duration in seconds: ' + ding.getDuration() + 'number of channels: ' + ding.getNumberOfChannels());
+  // console.log('duration in seconds: ' + sound.getDuration() + 'number of channels: ' + sound.getNumberOfChannels());
 });
 
-
 export default function SecondScreen({ navigation }) {
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [soundValue, setSoundValue] = useState(0);
+  const [currentValue, setCurrentValue] = useState(0);
   useEffect(() => {
-      playPause()
-      ding.setVolume(1);
-      return () => {
-        ding.release();
-      };
-    }, []);
-    const playPause = () => {
-      ding.play(success => {
+    const duration = sound.getDuration();
+    setSoundValue(Math.round(duration));
+    onPressPlay()
+  }, [])
+  useInterval(
+    () => {
+      const newValue = currentValue + 1;
+      setCurrentValue(newValue > soundValue ? currentValue : newValue);
+    },
+    isPlaying ? 1000 : null
+  );
+  const onPressPlay = () => {
+    if (isPlaying) {
+      sound.pause();
+      setIsPlaying(false);
+    } else {
+      setIsPlaying(true);
+      sound.play((success) => {
         if (success) {
-          console.log('successfully finished playing');
+          setIsPlaying(false);
         } else {
-          console.log('playback failed due to audio decoding errors');
+          setIsPlaying(false);
+          sound.stop();
+          setCurrentValue(0);
         }
       });
-    };
+    }
+  }
+  const onPressPrev = () => {
+    navigation.goBack()
+    sound.pause()
+  }
+  const onPressNext = () => {
+    navigation.navigate('ThirdScreen')
+  }
+  const slidingStart = () => {
+    sound.pause();
+  }
+  const slidingComplete = (value) => {
+    setIsPlaying(false);
+    sound.setCurrentTime(value);
+    setCurrentValue(value);
+    onPressPlay();
+  }
   return (
     <View style={styles.container}>
-      {/*
-        <Video
-          source={require('../video/video.mov')}
-          style={styles.video}
-          repeat={true}
-          // onEnd={() => navigation.navigate('ThirdScreen')}
-        />
-        */}
-      <VideoPlayer
-        source={{uri: 'https://vjs.zencdn.net/v/oceans.mp4'}}
+      <Video
+        source={require('../video/video.mov')}
+        style={styles.video}
+        repeat={true}
+        resizeMode="cover"
+        onEnd={() => navigation.navigate('MainScreen')}
       />
+      <Image style={styles.overlay} source={require('../img/overlay.png')} />
+      <Text style={styles.title}>Welcome!</Text>
+      <Text style={styles.text}> This course is a starting point to your organization’s cyber readiness.</Text>
+      <View style={styles.footer}>
+        <Image source={require('../img/panel.png')} style={styles.panel} />
+        <TouchableOpacity style={styles.btn} onPress={onPressPrev}>
+          <Image source={require('../img/prev.png')} style={styles.btnIcon} />
+        </TouchableOpacity>
+        <TouchableOpacity style={styles.btn} onPress={onPressPlay}>
+          <Image
+            source={isPlaying ? require('../img/pause.png') : require('../img/play.png')}
+            style={styles.btnIcon}
+          />
+        </TouchableOpacity>
+        <View style={styles.progressBar}>
+          <Image style={styles.progress} source={require('../img/progress.png')} />
+          {!!soundValue && (
+            <View style={styles.scrubberCol}>
+
+            </View>
+          )}
+        </View>
+        <TouchableOpacity style={styles.btn} onPress={onPressNext}>
+          <Image source={require('../img/next.png')} style={styles.btnIcon} />
+        </TouchableOpacity>
+      </View>
     </View>
   )
 }
 
 const styles = StyleSheet.create({
   container: {
-    flex: 1
+    flex: 1,
+    justifyContent: 'center',
+  },
+  title: {
+    fontSize: 60,
+    position: 'absolute',
+    color: '#fff',
+    fontWeight: '600',
+    alignSelf: 'center',
+    zIndex: 1,
+    paddingBottom: 400
+  },
+  text: {
+    fontSize: 40,
+    position: 'absolute',
+    color: '#fff',
+    fontWeight: '600',
+    alignSelf: 'center',
+    zIndex: 1,
+    textAlign: 'center'
   },
   video: {
-    width: '80%',
-    height: '80%'
+    height: '100%'
+  },
+  overlay: {
+    position: 'absolute',
+    zIndex: 1,
+    width: '100%',
+    height: '100%'
+  },
+  footer: {
+    position: 'absolute',
+    zIndex: 2,
+    bottom: 20,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    alignSelf: 'center'
+  },
+  panel: {
+    position: 'absolute',
+    width: '100%',
+    height: 44,
+    borderRadius: 10
   },
   btn: {
-    width: 200,
-    height: 100,
-    backgroundColor: 'red'
+    width: 36,
+    height: 36,
+    marginHorizontal: 5
+  },
+  btnIcon: {
+    width: 36,
+    height: 36
+  },
+  progressBar: {
+    width: 500,
+    height: 13,
+    marginHorizontal: 5,
+    marginRight: 20
+  },
+  progress: {
+    width: '100%',
+    height: '100%'
+  },
+  scrubberCol: {
+    position: 'absolute',
+    zIndex: 1,
+    width: '100%',
+    top: -14
+  },
+  scrubber: {
+    width: 28,
+    height: 28,
+    borderRadius: 14,
+    backgroundColor: '#fff'
   }
 });
